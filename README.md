@@ -28,7 +28,8 @@ cd ZN-AI
 ```
 ### 3. Install Dependencies
 ```bash
-pip install --no-deps ctransformers colorama pyfiglet tqdm requests filelock typing-extensions huggingface_hub PyYAML packaging
+pip install llama-cpp-python colorama pyfiglet huggingface_hub tqdm
+
 
 
 
@@ -40,6 +41,7 @@ python main.py
 ## 🎮 Mekanisme Penggunaan
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.den
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
+- **Ukuran File** Ukuran download dikirakan
 ### ⚠️ Catatan Instalasi (Troubleshooting)
 Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
 ```bash
