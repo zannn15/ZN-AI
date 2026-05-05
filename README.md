@@ -20,6 +20,12 @@ Copy and paste this entire block into your terminal to install prerequisites:
 sudo apt update && sudo apt install -y python3-pip git
 pip3 install torch transformers accelerate colorama pyfiglet sentencepiece huggingface_hub
 ```
+And launch
+```bash
+git clone [https://github.com/zannn15/ZN-AI.git](https://github.com/zannn15/ZN-AI.git)
+cd ZN-AI
+python3 main.py
+```
 ## 🛠️ Installation & usage (Android only)
 ```bash
 # 1. Update and install core requirements
