@@ -28,7 +28,8 @@ cd ZN-AI
 ```
 ### 3. Install Requirements (Hanya 3-4 Library!)
 ```bash
-pip install -r requirements.txt
+pip install ctransformers colorama pyfiglet huggingface_hub tqdm requests filelock
+
 ```
 ### 4. Jalankan ZN-AI
 ```bash
