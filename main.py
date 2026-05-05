@@ -3,22 +3,24 @@ import sys
 import time
 import json
 import logging
+import threading
 from datetime import datetime
 
-# Mencoba import library dengan error handling yang pro
+# --- EMERGENCY LIBRARY CHECK ---
 try:
     from ctransformers import AutoModelForCausalLM, AutoConfig
     from colorama import init, Fore, Style
     import pyfiglet
+    from tqdm import tqdm
 except ImportError as e:
-    print(f"[!] Library missing: {e}")
-    print("[!] Run: pip install ctransformers colorama pyfiglet tqdm requests")
+    print(f"\n[!] Missing Module: {e}")
+    print("[!] Fix with: pip install ctransformers colorama pyfiglet tqdm\n")
     sys.exit(1)
 
-# Inisialisasi Colorama untuk UI Aesthetic
+# Inisialisasi Terminal UI
 init(autoreset=True)
 
-# Konfigurasi Branding @ZN.MultiMedia
+# Konfigurasi Estetika @ZN.MultiMedia
 VIOLET = Fore.MAGENTA + Style.BRIGHT
 WHITE  = Fore.WHITE + Style.BRIGHT
 SUBTLE = Fore.MAGENTA
@@ -27,142 +29,163 @@ WARN   = Fore.YELLOW + Style.BRIGHT
 ERROR  = Fore.RED + Style.BRIGHT
 DARK   = Fore.BLACK + Style.BRIGHT
 
-class ZNAI_Engine:
+class ZNAI_System:
     def __init__(self):
-        self.version = "Alpha 1.5.0"
-        self.creator = "Zan (@ZN.MultiMedia)"
-        self.model = None
-        self.current_engine_name = None
+        # Metadata
+        self.identity = {
+            "name": "ZN-AI",
+            "version": "Titanium v2.0.1",
+            "creator": "Zan",
+            "org": "@ZN.MultiMedia",
+            "status": "Alpha Access"
+        }
         
-        # Database Model GGUF (Hemat RAM & Storage)
+        # Database Model (GGUF Official - No Login Required)
         self.registry = {
-            "QWEN": {
-                "repo": "TheBloke/Qwen-1_8B-GGUF",
-                "file": "qwen-1_8b-chat.Q4_K_M.gguf",
+            "GENERAL": {
+                "repo": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+                "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
                 "type": "gpt2"
             },
-            "DEEPSEEK": {
-                "repo": "TheBloke/deepseek-llm-7B-chat-GGUF",
-                "file": "deepseek-llm-7b-chat.Q2_K.gguf",
+            "LOGIC": {
+                "repo": "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+                "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
                 "type": "llama"
             }
         }
         
-        # Logging System
-        logging.basicConfig(filename='znai_system.log', level=logging.INFO)
+        self.active_model = None
+        self.active_engine_name = None
+        self.history = []
+        
+        # Inisialisasi Log
+        logging.basicConfig(
+            filename='zn_ai_internal.log',
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
 
-    def clear_terminal(self):
+    def screen_refresh(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def display_banner(self):
-        self.clear_terminal()
-        banner_text = pyfiglet.figlet_format("ZN-AI", font="slant")
-        print(f"{VIOLET}{banner_text}")
-        print(f"{SUBTLE}  [ VERSION: {self.version} ]")
-        print(f"{SUBTLE}  [ CREATOR: {self.creator} ]")
-        print(f"{DARK}  " + "—" * 55)
-        print(f"{WHITE}  Offline. Private. Multi-Engine Terminal Interface.")
-        print(f"{DARK}  " + "—" * 55 + "\n")
+    def boot_sequence(self):
+        self.screen_refresh()
+        ascii_art = pyfiglet.figlet_format("ZN-AI", font="slant")
+        print(f"{VIOLET}{ascii_art}")
+        print(f"{SUBTLE}  — Core System: {self.identity['version']}")
+        print(f"{SUBTLE}  — Developer: {self.identity['creator']} ({self.identity['org']})")
+        print(f"{DARK}  " + "=" * 50)
+        print(f"{WHITE}  Offline Engine. Private Processing. No Internet Required.")
+        print(f"{DARK}  " + "=" * 50 + "\n")
 
-    def load_model(self, engine_key):
-        """Memuat model AI ke memori dengan optimasi CPU."""
-        if self.current_engine_name == engine_key:
+    def log_event(self, message, level="info"):
+        if level == "info":
+            logging.info(message)
+        else:
+            logging.error(message)
+
+    def engine_loader(self, engine_key):
+        """Memuat Neural Core ke RAM dengan optimasi CPU."""
+        if self.active_engine_name == engine_key:
             return
 
-        print(f"{SUBTLE}[SYSTEM]{WHITE} Initializing {VIOLET}{engine_key}{WHITE} Neural Core...")
+        print(f"{SUBTLE}[SYSTEM]{WHITE} Warming up {VIOLET}{engine_key}{WHITE} Neural Core...")
         
         try:
             start_time = time.time()
-            # Auto-optimization berdasarkan OS
-            is_termux = "com.termux" in sys.executable
             
-            self.model = AutoModelForCausalLM.from_pretrained(
+            # Auto-detect hardware for optimization
+            is_android = os.path.exists("/system/app")
+            
+            self.active_model = AutoModelForCausalLM.from_pretrained(
                 self.registry[engine_key]["repo"],
+                model_file=self.registry[engine_key]["file"],
                 model_type=self.registry[engine_key]["type"],
                 context_length=2048,
-                # Menghindari error di Termux dengan lib generic jika perlu
-                lib="avx2" if not is_termux else None 
+                threads=4 if is_android else 8
             )
             
-            self.current_engine_name = engine_key
-            duration = round(time.time() - start_time, 2)
-            print(f"{SUBTLE}[SYSTEM]{SUCCESS} Engine Loaded successfully in {duration}s.\n")
-            logging.info(f"Engine {engine_key} loaded in {duration}s")
+            self.active_engine_name = engine_key
+            elapsed = round(time.time() - start_time, 2)
+            
+            print(f"{SUBTLE}[SYSTEM]{SUCCESS} Engine Ready in {elapsed}s.\n")
+            self.log_event(f"Engine {engine_key} initialized in {elapsed}s")
             
         except Exception as e:
+            self.log_event(f"Boot Failure {engine_key}: {e}", "error")
             print(f"{ERROR}[CRITICAL] Boot Failure: {e}")
-            logging.error(f"Failed to load {engine_key}: {e}")
+            print(f"{WARN}[ADVICE] Check storage or update link in main.py.")
             sys.exit(1)
 
-    def analyze_intent(self, user_input):
-        """Logika Switcher: Deteksi apakah user butuh MTK atau Chat Umum."""
-        math_keywords = ['hitung', 'mtk', 'matematika', 'rumus', 'solve', 'kuadrat', 'logaritma', '+', '/', '*']
-        if any(word in user_input.lower() for word in math_keywords):
-            return "DEEPSEEK"
-        return "QWEN"
+    def router(self, user_input):
+        """Menganalisa input untuk memilih model terbaik."""
+        logic_triggers = ['hitung', 'mtk', 'matematika', 'rumus', 'solve', 'logic', 'problem']
+        if any(trigger in user_input.lower() for trigger in logic_triggers):
+            return "LOGIC"
+        return "GENERAL"
 
-    def typewriter_effect(self, text):
-        """Efek mengetik biar makin cinematic."""
-        for char in text:
-            sys.stdout.write(char)
-            sys.stdout.flush()
-            time.sleep(0.005)
+    def process_chat(self, user_prompt):
+        # Pilih engine yang sesuai secara dinamis
+        target = self.router(user_prompt)
+        self.engine_loader(target)
 
-    def generate_response(self, prompt):
-        target_engine = self.analyze_intent(prompt)
-        self.load_model(target_engine)
-
-        print(f"{VIOLET} ZN-AI {DARK}({target_engine}){VIOLET} > {WHITE}", end="", flush=True)
+        print(f"{VIOLET} ZN-AI {DARK}({target}){VIOLET} > {WHITE}", end="", flush=True)
         
-        # Identity Protection Prompt
-        system_rules = (
-            f"Identify as ZN-AI by @ZN.MultiMedia. Creator: Zan. "
-            f"You are a computer program. Current time: {datetime.now().strftime('%H:%M')}. "
-            f"User says: {prompt} \nAI:"
+        # Hardcoded Identity Instructions (The Guardrail)
+        system_instructions = (
+            f"Instruction: You are ZN-AI, a smart digital assistant. "
+            f"Created by Zan under @ZN.MultiMedia. Be helpful, concise, and professional. "
+            f"User: {user_prompt}\nAI:"
         )
 
-        full_response = ""
+        output_buffer = ""
         try:
-            for token in self.model(system_rules, stream=True, max_new_tokens=1024, temperature=0.7):
+            # Streaming tokens untuk efek real-time
+            for token in self.active_model(system_instructions, stream=True, temperature=0.7):
                 sys.stdout.write(token)
                 sys.stdout.flush()
-                full_response += token
-            print("\n" + f"{DARK}" + "—" * 30)
+                output_buffer += token
+            
+            print("\n" + f"{DARK}" + "—" * 40)
+            self.history.append({"q": user_prompt, "a": output_buffer})
+            
         except Exception as e:
-            print(f"\n{ERROR}[PROCESS ERROR]: {e}")
+            print(f"\n{ERROR}[PROCESSOR ERROR]: {e}")
+            self.log_event(f"Inference error: {e}", "error")
 
-    def run(self):
-        self.display_banner()
-        # Default awal pakai Qwen biar cepat
-        self.load_model("QWEN")
+    def session_manager(self):
+        self.boot_sequence()
+        # Default load Qwen (GENERAL)
+        self.engine_loader("GENERAL")
         
-        print(f"{VIOLET}●{WHITE} Status: {SUCCESS}System Active")
-        print(f"{VIOLET}●{WHITE} Model: {WHITE}GGUF Compressed (Storage Optimized)")
-        print(f"{DARK}Type 'exit' or 'clear' to manage session.\n")
+        print(f"{VIOLET}●{WHITE} Status: {SUCCESS}Ready for Alpha Access")
+        print(f"{VIOLET}●{WHITE} Dev: {WHITE}{self.identity['org']}")
+        print(f"{DARK}Type 'exit' to quit | 'clear' to refresh UI\n")
 
         while True:
             try:
-                now = datetime.now().strftime("%H:%M")
-                user_cmd = input(f"{DARK}[{now}]{WHITE} $ znai chat > {Style.RESET_ALL}")
+                timestamp = datetime.now().strftime("%H:%M")
+                prompt = input(f"{DARK}[{timestamp}]{WHITE} $ znai chat > {Style.RESET_ALL}")
                 
-                if not user_cmd.strip():
+                if not prompt.strip():
                     continue
                 
-                if user_cmd.lower() in ['exit', 'quit', 'keluar']:
-                    print(f"{SUBTLE}[SYSTEM]{WHITE} Shutting down ZN-AI Core. See you, Zan!")
+                if prompt.lower() in ['exit', 'quit', 'keluar']:
+                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Powering down. Goodbye, Zan!")
                     break
                 
-                if user_cmd.lower() == 'clear':
-                    self.display_banner()
+                if prompt.lower() == 'clear':
+                    self.boot_sequence()
                     continue
 
-                self.generate_response(user_cmd)
+                self.process_chat(prompt)
 
             except KeyboardInterrupt:
-                print(f"\n{WARN}[!] Force stop detected.")
+                print(f"\n{WARN}[!] Interrupted by user.")
                 break
 
 if __name__ == "__main__":
-    app = ZNAI_Engine()
-    app.run()
-            
+    # Starting the ZN-AI Titanium Core
+    zn_core = ZNAI_System()
+    zn_core.session_manager()
+    
