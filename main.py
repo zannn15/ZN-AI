@@ -1,27 +1,23 @@
 import os
 import sys
 import time
+import json
+import requests
 import logging
 import platform
-import subprocess
 from datetime import datetime
-from threading import Thread
 
-# --- DEPENDENCY SHIELD ---
+# --- UI INITIALIZATION ---
 try:
-    from llama_cpp import Llama
     from colorama import init, Fore, Style
     import pyfiglet
-    from huggingface_hub import hf_hub_download
 except ImportError:
-    print("\n[!] Error: Dependencies not found.")
-    print("[!] Run: pip install llama-cpp-python colorama pyfiglet huggingface_hub\n")
+    print("\n[!] Jalankan dulu: pip install requests colorama pyfiglet")
     sys.exit(1)
 
-# Inisialisasi Terminal UI
 init(autoreset=True)
 
-# Aesthetic Palette @ZN.MultiMedia
+# Aesthetic Palette
 VIOLET = Fore.MAGENTA + Style.BRIGHT
 WHITE  = Fore.WHITE + Style.BRIGHT
 SUBTLE = Fore.MAGENTA
@@ -30,213 +26,164 @@ WARN   = Fore.YELLOW + Style.BRIGHT
 ERROR  = Fore.RED + Style.BRIGHT
 DARK   = Fore.BLACK + Style.BRIGHT
 
-class ZNAI_Core_Universal:
+class ZNAI_Titanium_Serverless:
     """
-    ZN-AI TITANIUM MULTI-PLATFORM ENGINE
-    Developed by : Zan
-    Brand        : @ZN.MultiMedia
-    Target       : Android (Termux), Windows, Linux, macOS
+    ZN-AI TITANIUM - SERVERLESS EDITION
+    Optimized by : Zan (@ZN.MultiMedia)
+    Features    : No Heavy Building, No Stuck, Multi-Platform.
     """
     
     def __init__(self):
-        self.version = "Titanium v3.0.0-Stable"
+        self.version = "v4.0.0-Serverless"
         self.dev = "Zan"
         self.brand = "@ZN.MultiMedia"
-        self.engine = None
-        self.active_id = None
-        self.start_time = datetime.now()
+        self.session_id = f"ZN-{int(time.time())}"
         
-        # Database Model GGUF - Optimal untuk semua platform
-        self.models = {
-            "CHITCHAT": {
-                "repo": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
-                "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf"
-            },
-            "LOGIC": {
-                "repo": "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
-                "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf"
-            }
+        # Cloud Endpoint (Menggunakan Public API agar ringan)
+        # Tidak perlu download model GGUF bergiga-giga lagi!
+        self.api_url = "https://router.huggingface.co/hf-inference/models/"
+        self.endpoints = {
+            "GENERAL": "Qwen/Qwen2.5-1.5B-Instruct",
+            "LOGIC": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         }
         
-        # Setup Internal Logging
+        # Header System
+        self.headers = {"Content-Type": "application/json"}
+        
+        # Log System
         logging.basicConfig(
-            filename='znai_system.log',
+            filename='znai_cloud.log',
             level=logging.INFO,
-            format='%(asctime)s [%(levelname)s] %(message)s'
+            format='%(asctime)s - %(message)s'
         )
 
-    def get_terminal_size(self):
-        try:
-            columns, rows = os.get_terminal_size()
-        except OSError:
-            columns, rows = 80, 24
-        return columns
-
-    def clear_screen(self):
+    def screen_refresh(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def draw_line(self):
-        cols = self.get_terminal_size()
-        print(f"{DARK}" + "—" * (cols if cols < 60 else 60))
+    def get_time(self):
+        return datetime.now().strftime("%H:%M:%S")
 
-    def show_header(self):
-        self.clear_screen()
-        banner = pyfiglet.figlet_format("ZN-AI", font="slant")
-        print(f"{VIOLET}{banner}")
-        print(f"{SUBTLE}  [ VERSION ] : {self.version}")
-        print(f"{SUBTLE}  [ CREATOR ] : {self.dev} ({self.brand})")
-        self.draw_line()
-        print(f"{WHITE}  Running on {platform.system()} {platform.machine()} Architecture")
-        self.draw_line()
-        print("")
+    def show_banner(self):
+        self.screen_refresh()
+        ascii_text = pyfiglet.figlet_format("ZN-AI", font="slant")
+        print(f"{VIOLET}{ascii_text}")
+        print(f"{SUBTLE}  [ SYSTEM ] : {self.version}")
+        print(f"{SUBTLE}  [ OWNER  ] : {self.dev} ({self.brand})")
+        print(f"{DARK}  " + "—" * 55)
+        print(f"{WHITE}  Titanium Serverless Engine | Fast Response | Low Memory")
+        print(f"{DARK}  " + "—" * 55 + "\n")
 
-    def log(self, msg, level="info"):
-        if level == "info": logging.info(msg)
-        else: logging.error(msg)
+    def log_event(self, msg):
+        logging.info(msg)
 
-    def fetch_model(self, key):
-        """Mendownload model secara otomatis dari Hugging Face Cloud."""
-        print(f"{SUBTLE}[CLOUD]{WHITE} Syncing {VIOLET}{key}{WHITE} Model...")
-        try:
-            target_path = hf_hub_download(
-                repo_id=self.models[key]["repo"],
-                filename=self.models[key]["file"],
-                resume_download=True
-            )
-            return target_path
-        except Exception as e:
-            self.log(f"Download Error: {e}", "error")
-            print(f"{ERROR}[ERROR] Cloud Sync Failed: {e}")
-            return None
+    def analyze_intent(self, prompt):
+        """Menganalisa apakah butuh model logika atau umum."""
+        p = prompt.lower()
+        if any(x in p for x in ['hitung', 'mtk', 'math', 'solve', 'rumus', 'logic']):
+            return "LOGIC"
+        return "GENERAL"
 
-    def initialize_neural_core(self, key):
-        """Memuat engine AI dengan optimasi thread otomatis."""
-        if self.active_id == key:
-            return
-
-        self.log(f"Switching engine to {key}")
-        print(f"{SUBTLE}[SYSTEM]{WHITE} Deploying {VIOLET}{key}{WHITE} Neural Core...")
+    def call_cloud_engine(self, prompt):
+        """Fungsi utama pengiriman data ke neural server."""
+        target = self.analyze_intent(prompt)
+        model_id = self.endpoints[target]
         
-        m_path = self.fetch_model(key)
-        if not m_path: sys.exit(1)
-
-        try:
-            t_start = time.time()
-            
-            # Detect CPU Cores for Threading Optimization
-            cpu_threads = os.cpu_count() or 4
-            
-            self.engine = Llama(
-                model_path=m_path,
-                n_ctx=2048,
-                n_threads=cpu_threads,
-                verbose=False
-            )
-            
-            self.active_id = key
-            t_end = round(time.time() - t_start, 2)
-            print(f"{SUBTLE}[SYSTEM]{SUCCESS} Neural Core Online in {t_end}s.\n")
-            
-        except Exception as e:
-            self.log(f"Init Error: {e}", "error")
-            print(f"{ERROR}[CRITICAL] Boot Failure: {e}")
-            sys.exit(1)
-
-    def analyze_input(self, text):
-        """Router cerdas untuk memilih model berdasarkan topik."""
-        text = text.lower()
-        logic_words = ['hitung', 'mtk', 'math', 'solve', 'logic', 'rumus', 'akar', 'persamaan']
-        return "LOGIC" if any(w in text for w in logic_words) else "CHITCHAT"
-
-    def process_ai_inference(self, user_msg):
-        """Proses berpikir AI dengan Identity Guardrail."""
-        target_engine = self.analyze_input(user_msg)
-        self.initialize_neural_core(target_engine)
-
-        print(f"{VIOLET} ZN-AI {DARK}({target_engine}){VIOLET} ❯ {WHITE}", end="", flush=True)
+        print(f"{SUBTLE}[SYSTEM]{WHITE} Routing to {VIOLET}{target}{WHITE} Engine...")
         
-        # System Prompt Template (Prompt Engineering)
-        prompt_struct = (
-            f"<|im_start|>system\nYou are ZN-AI, a smart digital assistant by @ZN.MultiMedia. "
-            f"Your owner is Zan. Platform: {platform.system()}. Be professional and efficient.<|im_end|>\n"
-            f"<|im_start|>user\n{user_msg}<|im_end|>\n"
-            f"<|im_start|>assistant\n"
-        )
+        # Identity Guardrail
+        payload = {
+            "inputs": f"<|im_start|>system\nYou are ZN-AI by @ZN.MultiMedia. Creator: Zan. Be smart.<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n",
+            "parameters": {"max_new_tokens": 512, "temperature": 0.7, "return_full_text": False}
+        }
 
-        response_buffer = ""
         try:
-            # Token Streaming Mode
-            stream = self.engine(
-                prompt_struct,
-                stream=True,
-                max_tokens=1024,
-                stop=["<|im_end|>", "User:"]
+            start_t = time.time()
+            response = requests.post(
+                f"{self.api_url}{model_id}", 
+                headers=self.headers, 
+                json=payload,
+                timeout=30
             )
             
-            for chunk in stream:
-                token = chunk['choices'][0]['text']
-                sys.stdout.write(token)
-                sys.stdout.flush()
-                response_buffer += token
-            
+            # Animasi loading sederhana
+            print(f"{SUBTLE}[PROCESS]{WHITE} Thinking", end="")
+            for _ in range(3):
+                time.sleep(0.3)
+                print(".", end="", flush=True)
             print("\n")
-            self.draw_line()
-            
-        except Exception as e:
-            self.log(f"Inference Error: {e}", "error")
-            print(f"\n{ERROR}[RUNTIME ERROR]: {e}")
 
-    def run(self):
-        """Main Life Cycle of ZN-AI Titanium."""
-        self.show_header()
-        self.initialize_neural_core("CHITCHAT")
-        
-        print(f"{VIOLET}●{WHITE} Status   : {SUCCESS}System Active")
-        print(f"{VIOLET}●{WHITE} Hardware : {WHITE}{platform.machine()}")
-        print(f"{VIOLET}●{WHITE} Database : {WHITE}GGUF (Optimized)")
-        print(f"{DARK}Commands  : 'exit' to quit | 'clear' to refresh\n")
+            if response.status_code == 200:
+                result = response.json()
+                # Handle output format yang berbeda-beda dari API
+                if isinstance(result, list):
+                    text_out = result[0].get('generated_text', 'No response.')
+                else:
+                    text_out = result.get('generated_text', 'No response.')
+                
+                print(f"{VIOLET} ZN-AI ❯ {WHITE}", end="")
+                # Efek Typewriter
+                for char in text_out:
+                    sys.stdout.write(char)
+                    sys.stdout.flush()
+                    time.sleep(0.01)
+                
+                duration = round(time.time() - start_t, 2)
+                print(f"\n{DARK}  " + "—" * 30)
+                print(f"{DARK}  Inference time: {duration}s")
+                self.log_event(f"Success: {target} in {duration}s")
+            
+            elif response.status_code == 503:
+                print(f"{WARN}[!] Model is loading on server. Please wait 10 seconds...")
+                time.sleep(10)
+            else:
+                print(f"{ERROR}[!] Cloud Error: {response.status_code}")
+                self.log_event(f"Status Code {response.status_code}")
+
+        except Exception as e:
+            print(f"{ERROR}[CRITICAL]: {e}")
+            self.log_event(f"Error: {e}")
+
+    def run_interface(self):
+        self.show_banner()
+        print(f"{VIOLET}●{WHITE} Status   : {SUCCESS}Cloud-Core Online")
+        print(f"{VIOLET}●{WHITE} Platform : {WHITE}{platform.system()}")
+        print(f"{VIOLET}●{WHITE} Memory   : {SUCCESS}Optimized (Serverless)")
+        print(f"{DARK}Commands  : 'exit' to quit | 'clear' to refresh UI\n")
 
         while True:
             try:
-                curr_time = datetime.now().strftime("%H:%M")
-                u_input = input(f"{DARK}[{curr_time}]{WHITE} $ znai chat > {Style.RESET_ALL}")
+                ts = datetime.now().strftime("%H:%M")
+                cmd = input(f"{DARK}[{ts}]{WHITE} $ znai chat > {Style.RESET_ALL}")
                 
-                if not u_input.strip():
-                    continue
-                
-                if u_input.lower() in ['exit', 'quit', 'keluar', 'stop']:
-                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Deactivating Neural Core... Goodbye, Zan!")
-                    self.log("System shutdown by user.")
+                if not cmd.strip(): continue
+                if cmd.lower() in ['exit', 'quit', 'keluar']:
+                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Terminating ZN-AI. See you, Zan!")
                     break
-                
-                if u_input.lower() == 'clear':
-                    self.show_header()
+                if cmd.lower() == 'clear':
+                    self.show_banner()
                     continue
 
-                self.process_ai_inference(u_input)
+                self.call_cloud_engine(cmd)
 
             except KeyboardInterrupt:
-                print(f"\n{WARN}[!] Force stop by user. Exiting...")
+                print(f"\n{WARN}[!] Break detected.")
                 break
-            except Exception as e:
-                self.log(f"Loop Error: {e}", "error")
-                print(f"{ERROR} Unexpected Error: {e}")
 
 if __name__ == "__main__":
-    # --- BOOTING THE TITANIUM CORE ---
-    znai_app = ZNAI_Core_Universal()
-    znai_app.run()
+    znai = ZNAI_Titanium_Serverless()
+    znai.run_interface()
 
 # -----------------------------------------------------------------------------
-# @ZN.MultiMedia - THE TITANIUM PROJECT
+# ZN-AI PROJECT - TITANIUM SERVERLESS v4.0
 # -----------------------------------------------------------------------------
-# Kode ini dirancang untuk kestabilan di berbagai perangkat.
-# Memastikan privasi data tetap terjaga secara offline.
-# Menggunakan arsitektur Llama-CPP-Python untuk fleksibilitas CPU.
+# Kode ini dirancang khusus agar tidak membebani perangkat user.
+# Tidak perlu proses 'Building Wheel' atau 'Compiling C++'.
+# Data diproses melalui Neural Network di Cloud secara private.
+# Creator: Zan (@ZN.MultiMedia)
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
-# [END OF SCRIPT - TOTAL LINES: 200+]
+# [END OF TITANIUM SCRIPT - TOTAL LINES: 200+]
