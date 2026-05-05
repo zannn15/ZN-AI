@@ -2,3 +2,6 @@ ctransformers
 colorama
 pyfiglet
 huggingface_hub
+tqdm
+requests
+filelock
