@@ -37,6 +37,10 @@ python main.py
 ## 🎮 Mekanisme Penggunaan
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
-
+### ⚠️ Catatan Instalasi (Troubleshooting)
+Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
+```bash
+pip install --no-deps ctransformers colorama pyfiglet huggingface_hub
+```
 ---
 **© 2026 @ZN.MultiMedia — Offline. Private. Powerful.**
