@@ -12,23 +12,28 @@ ZN-AI adalah asisten cerdas berbasis terminal yang dirancang untuk kecepatan, ef
 ## 📖 Tutorial Instalasi
 
 ### 1. Persiapan Sistem
-**Ubuntu VPS:**
+**VPS:**
+```bash
 sudo apt update && sudo apt install -y python3-pip git
-
+```
 **Termux (Android):**
+```bash
 pkg update && pkg upgrade
 pkg install python git clang binutils
-
+```
 ### 2. Deploy Project
+```bash
 git clone https://github.com/zannn15/ZN-AI.git
 cd ZN-AI
-
+```
 ### 3. Install Requirements (Hanya 3-4 Library!)
+```bash
 pip install -r requirements.txt
-
+```
 ### 4. Jalankan ZN-AI
+```bash
 python main.py
-
+```
 ## 🎮 Mekanisme Penggunaan
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
