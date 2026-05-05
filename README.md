@@ -28,15 +28,20 @@ cd ZN-AI
 ```
 ### 3. Install Requirements (Hanya 3-4 Library!)
 ```bash
-pip install ctransformers colorama pyfiglet huggingface_hub tqdm requests filelock
+pip install -r requirements.txt
+```
+### 4. Install Dependencies
+```bash
+pip install --no-deps ctransformers colorama pyfiglet tqdm requests filelock typing-extensions
+
 
 ```
-### 4. Jalankan ZN-AI
+### 5. Jalankan ZN-AI
 ```bash
 python main.py
 ```
 ## 🎮 Mekanisme Penggunaan
-- **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.
+- **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.den
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
 ### ⚠️ Catatan Instalasi (Troubleshooting)
 Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
