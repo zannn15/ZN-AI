@@ -1,7 +1,8 @@
-ctransformers
-colorama
-pyfiglet
-huggingface_hub
+ctransformers==0.2.27
+colorama==0.4.6
+pyfiglet==1.0.2
+huggingface_hub==0.24.0
 tqdm
 requests
-filelock
+PyYAML
+packaging
