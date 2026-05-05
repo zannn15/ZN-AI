@@ -1,17 +1,37 @@
-# 💜 ZN-AI : THE QWEN EDITION
-> **The Intelligent Core of @ZN.MultiMedia**
-> Developed by Zan — A Fusion of AI and Aesthetic Design.
+# 💜 ZN-AI CLI (Alpha Access)
+> **ZN.AI Rilis Di Terminal! (CLI)** — A part of @ZN.MultiMedia
+
+ZN-AI adalah asisten cerdas berbasis terminal yang dirancang untuk kecepatan, efisiensi sumber daya, dan privasi total.
+
+## 🚀 Fitur Utama
+- **Offline Chat**: Chat tanpa batas, kapan pun tanpa internet!
+- **Dual-Engine System**: Otomatis ganti model (Qwen untuk umum, DeepSeek untuk Logika/MTK).
+- **Resource Friendly**: Tanpa Torch/Tensorflow berat. Menggunakan GGUF format untuk hemat RAM.
+- **Cross-Device**: Lancar di Ubuntu VPS (CPU mode) dan Termux.
+
+## 📖 Tutorial Instalasi
+
+### 1. Persiapan Sistem
+**Ubuntu VPS:**
+sudo apt update && sudo apt install -y python3-pip git
+
+**Termux (Android):**
+pkg update && pkg upgrade
+pkg install python git clang binutils
+
+### 2. Deploy Project
+git clone https://github.com/zannn15/ZN-AI.git
+cd ZN-AI
+
+### 3. Install Requirements (Hanya 3-4 Library!)
+pip install -r requirements.txt
+
+### 4. Jalankan ZN-AI
+python main.py
+
+## 🎮 Mekanisme Penggunaan
+- **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.
+- **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
 
 ---
-
-## 🌌 ARCHITECTURE OVERVIEW
-ZN-AI is a high-performance local Large Language Model (LLM) designed for cross-platform dominance. It adapts its neural weight processing to match your hardware, whether you are on an **Ubuntu VPS**, a **High-End Laptop**, or **Termux Mobile**.
-
-```text
-    ______  _   __          ___     ____
-   /_  __/ / | / /         /   |   /  _/
-    / /   /  |/ /  ______ / /| |   / /  
-   / /   / /|  /  /_____// ___ | _/ /   
-  /_/   /_/ |_/         /_/  |_|/___/   
-                                        
-   [ SYSTEM STATUS : FULLY OPERATIONAL ]
+**© 2026 @ZN.MultiMedia — Offline. Private. Powerful.**
