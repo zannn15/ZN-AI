@@ -1,102 +1,97 @@
 import os
 import sys
 import time
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from ctransformers import AutoModelForSequenceGeneration, AutoConfig
 from colorama import init, Fore, Style
 
 init(autoreset=True)
 
-# @ZN.MultiMedia Theme
+# Branding Palette @ZN.MultiMedia
 VIOLET = Fore.MAGENTA + Style.BRIGHT
 SUBTLE = Fore.MAGENTA
 WHITE = Fore.WHITE + Style.BRIGHT
 DARK = Fore.BLACK + Style.BRIGHT
 SUCCESS = Fore.GREEN + Style.BRIGHT
-ERROR = Fore.RED + Style.BRIGHT
+WARN = Fore.YELLOW + Style.BRIGHT
 
-def clear_screen():
+def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def print_banner():
     try:
         import pyfiglet
-        banner = pyfiglet.figlet_format("ZN-AI", font="standard")
+        banner = pyfiglet.figlet_format("ZN-AI", font="slant")
         print(f"{VIOLET}{banner}")
-        print(f"{SUBTLE}  [ QWEN EDITION ] — A part of @ZN.MultiMedia")
-        print(f"{DARK}  " + "—" * 50 + "\n")
+        print(f"{SUBTLE}  ZN.AI CLI (Alpha) - Offline. Private. Powerful.")
+        print(f"{SUBTLE}  A part of @ZN.MultiMedia")
+        print(f"{DARK}  " + "—" * 45 + "\n")
     except:
-        print(f"\n{VIOLET}=== ZN-AI QWEN ===\n{SUBTLE}A part of @ZN.MultiMedia\n")
+        print(f"\n{VIOLET}=== ZN-AI CLI ===\n{SUBTLE}@ZN.MultiMedia\n")
 
-def typewriter(text, color=WHITE):
-    print(color, end="", flush=True)
-    for char in text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(0.012)
-    print(Style.RESET_ALL)
+class ZNAICore:
+    def __init__(self):
+        self.model = None
+        self.current_mode = None
+        # Menggunakan format GGUF agar hemat storage (hanya ~1GB per model)
+        self.models_config = {
+            "QWEN": "TheBloke/Qwen-1_8B-GGUF", # Untuk chat umum/berat
+            "DEEPSEEK": "TheBloke/deepseek-llm-7B-chat-GGUF" # Untuk logika/MTK
+        }
+
+    def load_engine(self, mode):
+        if self.current_mode == mode:
+            return
+        
+        print(f"{SUBTLE}[SYSTEM]{WHITE} Switching to {VIOLET}{mode}{WHITE} Engine...")
+        try:
+            # Menggunakan Ctransformers (Sangat ringan dibanding Torch)
+            self.model = AutoModelForSequenceGeneration.from_pretrained(
+                self.models_config[mode],
+                model_type="gpt2" if mode == "QWEN" else "llama",
+                lib="avx2" # Optimasi untuk CPU VPS/Termux
+            )
+            self.current_mode = mode
+            print(f"{SUBTLE}[SYSTEM]{SUCCESS} Engine Ready.\n")
+        except Exception as e:
+            print(f"{SUBTLE}[SYSTEM]{Fore.RED} Error: {e}")
+
+    def analyze_task(self, prompt):
+        # Mekanisme deteksi otomatis: Jika ada angka/logika pakai DeepSeek
+        logic_keywords = ['hitung', 'matematika', 'mtk', 'rumus', 'logic', 'solve', '+', '-', '*', '/']
+        if any(word in prompt.lower() for word in logic_keywords):
+            return "DEEPSEEK"
+        return "QWEN"
+
+    def generate(self, prompt):
+        target_mode = self.analyze_task(prompt)
+        self.load_engine(target_mode)
+        
+        print(f"{VIOLET} ZN-AI > {WHITE}", end="", flush=True)
+        response = ""
+        for token in self.model(prompt, stream=True):
+            sys.stdout.write(token)
+            sys.stdout.flush()
+            response += token
+        print("\n")
 
 def main():
-    clear_screen()
+    clear()
     print_banner()
+    core = ZNAICore()
     
-    model_id = "Qwen/Qwen2.5-1.5B-Instruct"
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # Pre-load model awal (Qwen)
+    core.load_engine("QWEN")
     
-    print(f"{SUBTLE}[SYSTEM]{WHITE} Initializing ZN-AI Core...")
-    
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            torch_dtype=torch.float32 if device == "cpu" else "auto",
-            device_map=device
-        )
-    except Exception as e:
-        print(f"\n{ERROR}[CRITICAL] Failed to load core: {e}")
-        return
-
-    clear_screen()
-    print_banner()
-    print(f"{VIOLET}●{WHITE} Status: {SUCCESS}System Online{Style.RESET_ALL}\n")
+    print(f"{VIOLET}●{WHITE} Status: {SUCCESS}System Active{Style.RESET_ALL}")
+    print(f"{DARK}Ketik 'exit' untuk keluar.\n")
 
     while True:
         try:
-            user_input = input(f"{WHITE} ❯ {Style.RESET_ALL}")
+            user_input = input(f"{WHITE} $ znai chat > {Style.RESET_ALL}")
             if not user_input.strip(): continue
-            if user_input.lower() in ['exit', 'quit', 'keluar']: break
-
-            print(f"\n{VIOLET} 🤖 ZN-AI {Style.RESET_ALL}", end="", flush=True)
+            if user_input.lower() in ['exit', 'keluar', 'quit']: break
             
-            # IDENTITY GUARDRAIL: Strict system instruction
-            messages = [
-                {
-                    "role": "system", 
-                    "content": (
-                        "You are ZN-AI, a professional and cool AI assistant built by Zan from @ZN.MultiMedia. "
-                        "IMPORTANT: You are a computer program, NOT a real person, NOT a prophet, and NOT a religious figure. "
-                        "If the user asks who you are, strictly answer as ZN-AI, the digital creation of Zan."
-                    )
-                },
-                {"role": "user", "content": user_input}
-            ]
-            
-            text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
-
-            generated_ids = model.generate(
-                model_inputs.input_ids,
-                max_new_tokens=512,
-                do_sample=True,
-                temperature=0.7,
-                top_p=0.9
-            )
-            
-            response_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
-            response = tokenizer.batch_decode(response_ids, skip_special_tokens=True)[0]
-
-            typewriter(response.strip())
-            print(f"\n{DARK}" + "—" * 25 + "\n")
+            core.generate(user_input)
             
         except KeyboardInterrupt:
             break
