@@ -1,25 +1,35 @@
 # 💜 ZN-AI (Qwen Edition)
 > **Zan Intelligence System** — A part of **@ZN.MultiMedia** 🎨
 
-ZN-AI is a local Large Language Model (LLM) implementation optimized for both mobile (Termux) and desktop environments. It focuses on the **Violet High-Contrast** aesthetic and total data privacy.
+ZN-AI is a Large Language Model (LLM) implementation optimized for mobile (Termux) and Ubuntu VPS environments. It focuses on the **Violet High-Contrast** aesthetic and total data privacy.
 
 ---
 
 ## ⚡ Key Features
-- **Universal Device Support**: Seamlessly runs on Android (Termux) and Windows/Mac/Linux.
-- **Aesthetic Terminal UI**: Featuring the signature @ZN.MultiMedia violet branding.
-- **Auto-Hardware Detection**: Automatically optimizes for CPU or GPU power.
-- **Privacy First**: 100% Offline; no data ever leaves your device.
+- **Universal Device Support**: Seamlessly runs on Android (Termux) and Windows/Mac/Linux VPS.
+- **Aesthetic Terminal UI**: Large retro-modern purple banner with **@ZN.MultiMedia** identity.
+- **Auto-Optimization**: Automatically detects CPU or GPU power for best performance.
+- **Privacy First**: 100% Offline (Local Mode), no data is ever sent externally.
 
 ## 🛠️ Installation & Usage
 
-### 1. Prerequisites
-- **Mobile (Termux)**: `pkg install python git clang`
-- **Laptop**: Ensure Python 3.10+ is installed
+### 1. Prerequisites (Ubuntu VPS)
+Copy and paste this entire block into your terminal to install prerequisites:
 
-### 2. Launching ZN-AI
 ```bash
-git clone [https://github.com/zannn15/ZN-AI.git](https://github.com/zannn15/ZN-AI.git)
+sudo apt update && sudo apt install -y python3-pip git
+pip3 install torch transformers accelerate colorama pyfiglet sentencepiece huggingface_hub
+```
+## 🛠️ Installation & usage (Android only)
+```bash
+# 1. Update and install core requirements
+pkg update && pkg upgrade
+pkg install python git clang binutils
+
+# 2. Install the specific libraries for the UI and AI
+pip install torch transformers accelerate colorama pyfiglet sentencepiece huggingface_hub
+
+# 3. Clone and Run
+git clone https://github.com/zannn15/ZN-AI.git
 cd ZN-AI
-pip install -r requirements.txt
 python main.py
