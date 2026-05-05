@@ -1,7 +1,7 @@
 # 💜 ZN-AI (Qwen Edition)
 > **Zan Intelligence System** — A part of **@ZN.MultiMedia** 🎨
 
-ZN-AI is a Large Language Model (LLM) implementation optimized for mobile (Termux) and Ubuntu VPS environments. It focuses on the **Violet High-Contrast** aesthetic and total data privacy.
+ZN-AI is a Large Language Model (LLM) implementation optimized for mobile (Termux) and VPS environments. It focuses on the **Violet High-Contrast** aesthetic and total data privacy.
 
 ---
 
@@ -13,7 +13,7 @@ ZN-AI is a Large Language Model (LLM) implementation optimized for mobile (Termu
 
 ## 🛠️ Installation & Usage
 
-### 1. Prerequisites (Ubuntu VPS)
+### 1. Prerequisites (VPS)
 Copy and paste this entire block into your terminal to install prerequisites:
 
 ```bash
