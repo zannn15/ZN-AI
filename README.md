@@ -28,10 +28,7 @@ cd ZN-AI
 ```
 ### 3. Install Dependencies
 ```bash
-pip install llama-cpp-python colorama pyfiglet huggingface_hub tqdm
-
-
-
+pip install ctransformers==0.2.27 colorama pyfiglet huggingface_hub tqdm requests PyYAML
 
 ```
 ### 4. Jalankan ZN-AI
