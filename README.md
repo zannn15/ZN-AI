@@ -26,17 +26,14 @@ pkg install python git clang binutils
 git clone https://github.com/zannn15/ZN-AI.git
 cd ZN-AI
 ```
-### 3. Install Requirements (Hanya 3-4 Library!)
+### 3. Install Dependencies
 ```bash
-pip install -r requirements.txt
-```
-### 4. Install Dependencies
-```bash
-pip install --no-deps ctransformers colorama pyfiglet tqdm requests filelock typing-extensions
+pip install --no-deps ctransformers colorama pyfiglet tqdm requests filelock typing-extensions huggingface_hub PyYAML packaging
+
 
 
 ```
-### 5. Jalankan ZN-AI
+### 4. Jalankan ZN-AI
 ```bash
 python main.py
 ```
