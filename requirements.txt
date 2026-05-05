@@ -4,3 +4,4 @@ accelerate
 colorama
 pyfiglet
 sentencepiece
+huggingface_hub
