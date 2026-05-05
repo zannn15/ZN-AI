@@ -52,6 +52,10 @@ class ZNAI_Titanium_Core:
             "NEURAL_1": "Qwen/Qwen2.5-1.5B-Instruct",
             "NEURAL_2": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         }
+                self.headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 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"
+                }
         
         self.active_session = True
         self.history = []
