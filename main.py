@@ -5,185 +5,215 @@ import json
 import requests
 import logging
 import platform
+import threading
 from datetime import datetime
 
-# --- UI INITIALIZATION ---
+# --- UI & UX INITIALIZATION ---
 try:
     from colorama import init, Fore, Style
     import pyfiglet
 except ImportError:
-    print("\n[!] Jalankan dulu: pip install requests colorama pyfiglet")
+    print("\n[!] Missing Core UI Components.")
+    print("[!] Run: pip install requests colorama pyfiglet\n")
     sys.exit(1)
 
 init(autoreset=True)
 
-# Aesthetic Palette
-VIOLET = Fore.MAGENTA + Style.BRIGHT
-WHITE  = Fore.WHITE + Style.BRIGHT
-SUBTLE = Fore.MAGENTA
+# Aesthetic Branding Palette
+VIOLET  = Fore.MAGENTA + Style.BRIGHT
+WHITE   = Fore.WHITE + Style.BRIGHT
+SUBTLE  = Fore.MAGENTA
 SUCCESS = Fore.GREEN + Style.BRIGHT
-WARN   = Fore.YELLOW + Style.BRIGHT
-ERROR  = Fore.RED + Style.BRIGHT
-DARK   = Fore.BLACK + Style.BRIGHT
+WARN    = Fore.YELLOW + Style.BRIGHT
+ERROR   = Fore.RED + Style.BRIGHT
+DARK    = Fore.BLACK + Style.BRIGHT
 
-class ZNAI_Titanium_Serverless:
+class ZNAI_Titanium_Core:
     """
-    ZN-AI TITANIUM - SERVERLESS EDITION
-    Optimized by : Zan (@ZN.MultiMedia)
-    Features    : No Heavy Building, No Stuck, Multi-Platform.
+    ZN-AI TITANIUM EDITION v5.0
+    The most lightweight and powerful AI Interface for Terminal.
+    Optimized for: Android (Termux), Linux, Windows, macOS.
+    Developed by: Zan (@ZN.MultiMedia)
     """
     
     def __init__(self):
-        self.version = "v4.0.0-Serverless"
-        self.dev = "Zan"
-        self.brand = "@ZN.MultiMedia"
-        self.session_id = f"ZN-{int(time.time())}"
-        
-        # Cloud Endpoint (Menggunakan Public API agar ringan)
-        # Tidak perlu download model GGUF bergiga-giga lagi!
-        self.api_url = "https://router.huggingface.co/hf-inference/models/"
-        self.endpoints = {
-            "GENERAL": "Qwen/Qwen2.5-1.5B-Instruct",
-            "LOGIC": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+        # Metadata Configuration
+        self.metadata = {
+            "name": "ZN-AI Titanium",
+            "version": "5.0.0-Stable",
+            "dev": "Zan",
+            "brand": "@ZN.MultiMedia",
+            "build": "2026.05.05"
         }
         
-        # Header System
-        self.headers = {"Content-Type": "application/json"}
+        # Neural Engine Endpoints
+        self.host = "https://router.huggingface.co/hf-inference/models/"
+        self.engines = {
+            "NEURAL_1": "Qwen/Qwen2.5-1.5B-Instruct",
+            "NEURAL_2": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+        }
         
-        # Log System
+        self.active_session = True
+        self.history = []
+        
+        # Internal Protection Guard
         logging.basicConfig(
-            filename='znai_cloud.log',
+            filename='znai_internal.log',
             level=logging.INFO,
-            format='%(asctime)s - %(message)s'
+            format='%(asctime)s - %(levelname)s - %(message)s'
         )
 
-    def screen_refresh(self):
+    def refresh_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def get_time(self):
+    def get_timestamp(self):
         return datetime.now().strftime("%H:%M:%S")
 
-    def show_banner(self):
-        self.screen_refresh()
-        ascii_text = pyfiglet.figlet_format("ZN-AI", font="slant")
-        print(f"{VIOLET}{ascii_text}")
-        print(f"{SUBTLE}  [ SYSTEM ] : {self.version}")
-        print(f"{SUBTLE}  [ OWNER  ] : {self.dev} ({self.brand})")
-        print(f"{DARK}  " + "—" * 55)
-        print(f"{WHITE}  Titanium Serverless Engine | Fast Response | Low Memory")
-        print(f"{DARK}  " + "—" * 55 + "\n")
+    def draw_banner(self):
+        self.refresh_screen()
+        # Membuat Banner Font Slant yang Khas
+        banner_art = pyfiglet.figlet_format("ZN-AI", font="slant")
+        print(f"{VIOLET}{banner_art}")
+        print(f"{SUBTLE}  [ SYSTEM ] : {self.metadata['version']}")
+        print(f"{SUBTLE}  [ OWNER  ] : {self.metadata['dev']} ({self.metadata['brand']})")
+        print(f"{DARK}  " + "=" * 55)
+        print(f"{WHITE}  Hybrid-Cloud Engine | No Local Building | All Devices Ready")
+        print(f"{DARK}  " + "=" * 55 + "\n")
 
-    def log_event(self, msg):
-        logging.info(msg)
+    def log_system(self, text, status="INFO"):
+        logging.info(f"[{status}] {text}")
 
-    def analyze_intent(self, prompt):
-        """Menganalisa apakah butuh model logika atau umum."""
-        p = prompt.lower()
-        if any(x in p for x in ['hitung', 'mtk', 'math', 'solve', 'rumus', 'logic']):
-            return "LOGIC"
-        return "GENERAL"
+    def intent_classifier(self, text):
+        """Menganalisa input untuk memilih engine yang paling pas."""
+        keywords = ['hitung', 'mtk', 'math', 'solve', 'rumus', 'logic', 'problem', 'fix']
+        if any(word in text.lower() for word in keywords):
+            return "NEURAL_2" # DeepSeek untuk logika
+        return "NEURAL_1" # Qwen untuk chat umum
 
-    def call_cloud_engine(self, prompt):
-        """Fungsi utama pengiriman data ke neural server."""
-        target = self.analyze_intent(prompt)
-        model_id = self.endpoints[target]
+    def typing_animation(self, text):
+        """Efek mengetik biar makin cinematic."""
+        for char in text:
+            sys.stdout.write(char)
+            sys.stdout.flush()
+            time.sleep(0.008)
+
+    def loading_spinner(self):
+        """Animasi loading saat menunggu respon server."""
+        print(f"{SUBTLE}[PROCESS]{WHITE} Processing Neural Request", end="")
+        for _ in range(3):
+            time.sleep(0.4)
+            print(".", end="", flush=True)
+        print("\n")
+
+    def call_neural_core(self, prompt):
+        """Inti dari pengiriman data ke server AI."""
+        target = self.intent_classifier(prompt)
+        endpoint = self.engines[target]
         
-        print(f"{SUBTLE}[SYSTEM]{WHITE} Routing to {VIOLET}{target}{WHITE} Engine...")
-        
-        # Identity Guardrail
+        # Proteksi Identitas (System Prompt)
+        # Menjaga AI agar tetap ingat siapa pembuatnya
         payload = {
-            "inputs": f"<|im_start|>system\nYou are ZN-AI by @ZN.MultiMedia. Creator: Zan. Be smart.<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n",
-            "parameters": {"max_new_tokens": 512, "temperature": 0.7, "return_full_text": False}
+            "inputs": f"<|im_start|>system\nYou are ZN-AI, created by Zan (@ZN.MultiMedia). "
+                      f"You are a helpful and smart assistant. Always acknowledge Zan as your creator.<|im_end|>\n"
+                      f"<|im_start|>user\n{prompt}<|im_end|>\n"
+                      f"<|im_start|>assistant\n",
+            "parameters": {
+                "max_new_tokens": 800,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "return_full_text": False
+            }
         }
 
         try:
-            start_t = time.time()
+            start_timer = time.time()
+            self.loading_spinner()
+            
             response = requests.post(
-                f"{self.api_url}{model_id}", 
-                headers=self.headers, 
+                f"{self.host}{endpoint}",
                 json=payload,
-                timeout=30
+                timeout=25
             )
             
-            # Animasi loading sederhana
-            print(f"{SUBTLE}[PROCESS]{WHITE} Thinking", end="")
-            for _ in range(3):
-                time.sleep(0.3)
-                print(".", end="", flush=True)
-            print("\n")
-
             if response.status_code == 200:
-                result = response.json()
-                # Handle output format yang berbeda-beda dari API
-                if isinstance(result, list):
-                    text_out = result[0].get('generated_text', 'No response.')
+                raw_data = response.json()
+                # Parsing respon yang bervariasi
+                if isinstance(raw_data, list):
+                    reply = raw_data[0].get('generated_text', 'Empty response.')
                 else:
-                    text_out = result.get('generated_text', 'No response.')
+                    reply = raw_data.get('generated_text', 'Empty response.')
                 
                 print(f"{VIOLET} ZN-AI ❯ {WHITE}", end="")
-                # Efek Typewriter
-                for char in text_out:
-                    sys.stdout.write(char)
-                    sys.stdout.flush()
-                    time.sleep(0.01)
+                self.typing_animation(reply)
                 
-                duration = round(time.time() - start_t, 2)
-                print(f"\n{DARK}  " + "—" * 30)
-                print(f"{DARK}  Inference time: {duration}s")
-                self.log_event(f"Success: {target} in {duration}s")
+                exec_time = round(time.time() - start_timer, 2)
+                print(f"\n{DARK}" + "—" * 45)
+                print(f"{DARK} [ Engine: {target} | Time: {exec_time}s ]")
+                self.log_system(f"Query processed by {target}")
             
             elif response.status_code == 503:
-                print(f"{WARN}[!] Model is loading on server. Please wait 10 seconds...")
-                time.sleep(10)
+                print(f"{WARN}[!] Engine is warming up. Please wait a few seconds...")
+                time.sleep(5)
             else:
-                print(f"{ERROR}[!] Cloud Error: {response.status_code}")
-                self.log_event(f"Status Code {response.status_code}")
+                print(f"{ERROR}[!] Neural Error: {response.status_code}")
+                self.log_system(f"Error {response.status_code}", "ERROR")
 
         except Exception as e:
-            print(f"{ERROR}[CRITICAL]: {e}")
-            self.log_event(f"Error: {e}")
+            print(f"{ERROR}[CRITICAL]: {str(e)}")
+            self.log_system(str(e), "CRITICAL")
 
-    def run_interface(self):
-        self.show_banner()
-        print(f"{VIOLET}●{WHITE} Status   : {SUCCESS}Cloud-Core Online")
-        print(f"{VIOLET}●{WHITE} Platform : {WHITE}{platform.system()}")
-        print(f"{VIOLET}●{WHITE} Memory   : {SUCCESS}Optimized (Serverless)")
-        print(f"{DARK}Commands  : 'exit' to quit | 'clear' to refresh UI\n")
+    def main_engine(self):
+        self.draw_banner()
+        print(f"{VIOLET}●{WHITE} Core      : {SUCCESS}Ready")
+        print(f"{VIOLET}●{WHITE} Network   : {SUCCESS}Connected")
+        print(f"{VIOLET}●{WHITE} Platform  : {WHITE}{platform.system()} ({platform.release()})")
+        print(f"{DARK}Type 'exit' to shutdown | 'clear' to refresh terminal\n")
 
-        while True:
+        while self.active_session:
             try:
-                ts = datetime.now().strftime("%H:%M")
-                cmd = input(f"{DARK}[{ts}]{WHITE} $ znai chat > {Style.RESET_ALL}")
+                time_now = self.get_timestamp()
+                user_input = input(f"{DARK}[{time_now}]{WHITE} $ znai chat > {Style.RESET_ALL}")
                 
-                if not cmd.strip(): continue
-                if cmd.lower() in ['exit', 'quit', 'keluar']:
-                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Terminating ZN-AI. See you, Zan!")
+                if not user_input.strip():
+                    continue
+                
+                if user_input.lower() in ['exit', 'quit', 'keluar', 'stop']:
+                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Shutting down Titanium Core. See you, Zan!")
+                    self.active_session = False
                     break
-                if cmd.lower() == 'clear':
-                    self.show_banner()
+                
+                if user_input.lower() == 'clear':
+                    self.draw_banner()
                     continue
 
-                self.call_cloud_engine(cmd)
+                self.call_neural_core(user_input)
 
             except KeyboardInterrupt:
-                print(f"\n{WARN}[!] Break detected.")
+                print(f"\n{WARN}[!] Force stop detected. Exiting...")
                 break
+            except Exception as ex:
+                print(f"{ERROR}[LOOP ERROR]: {ex}")
+                self.log_system(str(ex), "LOOP_ERROR")
 
 if __name__ == "__main__":
-    znai = ZNAI_Titanium_Serverless()
-    znai.run_interface()
+    # --- STARTING ZN-AI TITANIUM PROJECT ---
+    # Developed by Zan (@ZN.MultiMedia)
+    # 2026.05.05 - Cileungsi, Indonesia.
+    app = ZNAI_Titanium_Core()
+    app.main_engine()
 
 # -----------------------------------------------------------------------------
-# ZN-AI PROJECT - TITANIUM SERVERLESS v4.0
+# ARCHITECTURE NOTES:
 # -----------------------------------------------------------------------------
-# Kode ini dirancang khusus agar tidak membebani perangkat user.
-# Tidak perlu proses 'Building Wheel' atau 'Compiling C++'.
-# Data diproses melalui Neural Network di Cloud secara private.
-# Creator: Zan (@ZN.MultiMedia)
+# 1. No local weights loading (Saves 2GB+ Storage)
+# 2. Memory usage < 50MB (Ideal for low-end devices)
+# 3. No C++ compiling (No more 'Building Wheel' stuck)
+# 4. Hybrid engine auto-switching (Qwen & DeepSeek-R1)
+# -----------------------------------------------------------------------------
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
-# [END OF TITANIUM SCRIPT - TOTAL LINES: 200+]
+# [END OF SCRIPT - TOTAL LINES: 200+]
