@@ -41,7 +41,7 @@ python main.py
 ## 🎮 Mekanisme Penggunaan
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.den
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
-- **Ukuran File** Ukuran download dikirakan
+- **Ukuran File** Ukuran download dikirakan **1.5-2GB*
 ### ⚠️ Catatan Instalasi (Troubleshooting)
 Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
 ```bash
