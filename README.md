@@ -21,17 +21,27 @@ sudo apt update && sudo apt install -y python3-pip git
 pkg update && pkg upgrade
 pkg install python git clang binutils
 ```
+**For Termux (Android) Update Tool Termux :** 
+```bash
+pkg update && pkg upgrade
+pkg install clang cmake binutils ndk-sysroot -y
+```
 ### 2. Deploy Project
 ```bash
 git clone https://github.com/zannn15/ZN-AI.git
 cd ZN-AI
 ```
-### 3. Install Dependencies
+### 3. Install component
 ```bash
-pip install --no-deps llama-cpp-python colorama pyfiglet huggingface_hub tqdm requests PyYAML packaging py-cpuinfo
+pip install llama-cpp-python --no-deps
+
 
 ```
-### 4. Jalankan ZN-AI
+### 4. Install Dependencies
+```bash
+pip install colorama pyfiglet huggingface_hub tqdm requests PyYAML packaging py-cpuinfo
+```
+### 5. Run your Agent ZN.AI
 ```bash
 python main.py
 ```
@@ -39,7 +49,7 @@ python main.py
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.den
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
 - **Ukuran File** Ukuran download dikirakan **1.5-2GB*
-### ⚠️ Catatan Instalasi (Troubleshooting)
+##`# ⚠️ Catatan Instalasi (Troubleshooting)
 Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
 ```bash
 pip install --no-deps ctransformers colorama pyfiglet huggingface_hub
