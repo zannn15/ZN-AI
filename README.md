@@ -31,24 +31,18 @@ pkg install clang cmake binutils ndk-sysroot -y
 git clone https://github.com/zannn15/ZN-AI.git
 cd ZN-AI
 ```
-### 3. Install component
+### 3. Install Dependencies
 ```bash
-pip install llama-cpp-python --no-deps
-
-
+pip install requests colorama pyfiglet python-dotenv
 ```
-### 4. Install Dependencies
-```bash
-pip install colorama pyfiglet huggingface_hub tqdm requests PyYAML packaging py-cpuinfo
-```
-### 5. Run your Agent ZN.AI
+### 4. Run your Agent ZN.AI
 ```bash
 python main.py
 ```
 ## 🎮 Mekanisme Penggunaan
 - **Otomatisasi**: Sistem akan mendeteksi jika pertanyaanmu butuh logika (MTK) dan akan switch ke model DeepSeek secara mandiri.den
 - **Hemat Storage**: Menggunakan library `ctransformers` yang jauh lebih kecil ukurannya dibanding library AI standar.
-- **Ukuran File** Ukuran download dikirakan **1.5-2GB*
+- **Ukuran File** Ukuran download dikirakan *1.5-2GB*
 ##`# ⚠️ Catatan Instalasi (Troubleshooting)
 Jika muncul error 'Failed to build hf-xet', gunakan perintah ini:
 ```bash
