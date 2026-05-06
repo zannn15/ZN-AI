@@ -5,21 +5,21 @@ import json
 import requests
 import logging
 import platform
-import threading
 from datetime import datetime
 
-# --- UI & UX INITIALIZATION ---
+# --- CORE DEPENDENCIES ---
 try:
     from colorama import init, Fore, Style
     import pyfiglet
+    from dotenv import load_dotenv
 except ImportError:
-    print("\n[!] Missing Core UI Components.")
-    print("[!] Run: pip install requests colorama pyfiglet\n")
+    print("\n[!] Library belum lengkap.")
+    print("[!] Jalankan: pip install requests colorama pyfiglet python-dotenv\n")
     sys.exit(1)
 
 init(autoreset=True)
 
-# Aesthetic Branding Palette
+# Aesthetic Branding Palette @ZN.MultiMedia
 VIOLET  = Fore.MAGENTA + Style.BRIGHT
 WHITE   = Fore.WHITE + Style.BRIGHT
 SUBTLE  = Fore.MAGENTA
@@ -28,196 +28,203 @@ WARN    = Fore.YELLOW + Style.BRIGHT
 ERROR   = Fore.RED + Style.BRIGHT
 DARK    = Fore.BLACK + Style.BRIGHT
 
-class ZNAI_Titanium_Core:
+class ZNAI_AutoConfig_Core:
     """
-    ZN-AI TITANIUM EDITION v5.0
-    The most lightweight and powerful AI Interface for Terminal.
-    Optimized for: Android (Termux), Linux, Windows, macOS.
-    Developed by: Zan (@ZN.MultiMedia)
+    ZN-AI TITANIUM EDITION v6.5
+    Smart Configuration & Secure Vault Architecture.
+    Developed by : Zan
+    Brand        : @ZN.MultiMedia
     """
-    
+
     def __init__(self):
-        # Metadata Configuration
-        self.metadata = {
+        self.cls()
+        # 1. SMART AUTO-CONFIG LOGIC
+        # Mengecek keberadaan file rahasia (.env)
+        if not os.path.exists(".env"):
+            self.run_first_time_setup()
+
+        # 2. LOAD SECRETS
+        load_dotenv()
+        self.token = os.getenv("HF_TOKEN")
+
+        # 3. IDENTITY CONFIG
+        self.identity = {
             "name": "ZN-AI Titanium",
-            "version": "5.0.0-Stable",
-            "dev": "Zan",
-            "brand": "@ZN.MultiMedia",
-            "build": "2026.05.05"
+            "ver": "6.5.0-AutoConfig",
+            "owner": "Zan",
+            "brand": "@ZN.MultiMedia"
         }
-        
-        # Neural Engine Endpoints
-        self.host = "https://router.huggingface.co/hf-inference/models/"
+
+        # 4. ENGINE CONFIG
+        self.api_base = "https://router.huggingface.co/hf-inference/models/"
         self.engines = {
-            "NEURAL_1": "Qwen/Qwen2.5-1.5B-Instruct",
-            "NEURAL_2": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+            "CHAT": "Qwen/Qwen2.5-1.5B-Instruct",
+            "LOGIC": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         }
-                self.headers = {
+
+        self.headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer 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"
-                }
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        self.active = True
+        self.setup_logs()
+
+    def run_first_time_setup(self):
+        """Proses pembuatan file .env otomatis jika belum ada."""
+        ascii_setup = pyfiglet.figlet_format("ZN-SETUP", font="small")
+        print(f"{VIOLET}{ascii_setup}")
+        print(f"{DARK}—" * 50)
+        print(f"{WHITE}[!] Welcome to @ZN.MultiMedia Project")
+        print(f"{WHITE}[?] Sepertinya ini pertama kali kamu menjalankan ZN-AI.")
+        print(f"{SUBTLE}[*] Silakan masukkan Token Hugging Face kamu untuk melanjutkan.")
+        print(f"{DARK}—" * 50)
         
-        self.active_session = True
-        self.history = []
+        user_token = input(f"\n{WHITE}Masukkan Token (hf_...): {Fore.YELLOW}").strip()
         
-        # Internal Protection Guard
+        if user_token.startswith("hf_"):
+            try:
+                with open(".env", "w") as f:
+                    f.write(f"HF_TOKEN={user_token}")
+                print(f"\n{SUCCESS}[+] Berhasil! File .env telah dibuat otomatis.")
+                print(f"{SUCCESS}[+] Token kamu tersimpan aman di sistem lokal.")
+                time.sleep(2)
+                self.cls()
+            except Exception as e:
+                print(f"{ERROR}[!] Gagal membuat file .env: {e}")
+                sys.exit(1)
+        else:
+            print(f"\n{ERROR}[!] Token Tidak Valid! Harus diawali dengan 'hf_'.")
+            print(f"{WARN}[*] Ambil token di: huggingface.co/settings/tokens")
+            sys.exit(1)
+
+    def setup_logs(self):
         logging.basicConfig(
-            filename='znai_internal.log',
+            filename='znai_system.log',
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            format='%(asctime)s - %(message)s'
         )
 
-    def refresh_screen(self):
+    def cls(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def get_timestamp(self):
+    def get_time(self):
         return datetime.now().strftime("%H:%M:%S")
 
-    def draw_banner(self):
-        self.refresh_screen()
-        # Membuat Banner Font Slant yang Khas
-        banner_art = pyfiglet.figlet_format("ZN-AI", font="slant")
-        print(f"{VIOLET}{banner_art}")
-        print(f"{SUBTLE}  [ SYSTEM ] : {self.metadata['version']}")
-        print(f"{SUBTLE}  [ OWNER  ] : {self.metadata['dev']} ({self.metadata['brand']})")
+    def show_banner(self):
+        self.cls()
+        banner = pyfiglet.figlet_format("ZN-AI", font="slant")
+        print(f"{VIOLET}{banner}")
+        print(f"{SUBTLE}  [ VERSION ] : {self.identity['ver']}")
+        print(f"{SUBTLE}  [ OWNER   ] : {self.identity['owner']} ({self.identity['brand']})")
         print(f"{DARK}  " + "=" * 55)
-        print(f"{WHITE}  Hybrid-Cloud Engine | No Local Building | All Devices Ready")
+        print(f"{WHITE}  Auto-Config Mode | Secure Variable Engine | Hybrid Neural")
         print(f"{DARK}  " + "=" * 55 + "\n")
 
-    def log_system(self, text, status="INFO"):
-        logging.info(f"[{status}] {text}")
-
-    def intent_classifier(self, text):
-        """Menganalisa input untuk memilih engine yang paling pas."""
-        keywords = ['hitung', 'mtk', 'math', 'solve', 'rumus', 'logic', 'problem', 'fix']
-        if any(word in text.lower() for word in keywords):
-            return "NEURAL_2" # DeepSeek untuk logika
-        return "NEURAL_1" # Qwen untuk chat umum
-
-    def typing_animation(self, text):
-        """Efek mengetik biar makin cinematic."""
+    def typing(self, text):
         for char in text:
             sys.stdout.write(char)
             sys.stdout.flush()
-            time.sleep(0.008)
+            time.sleep(0.01)
 
-    def loading_spinner(self):
-        """Animasi loading saat menunggu respon server."""
-        print(f"{SUBTLE}[PROCESS]{WHITE} Processing Neural Request", end="")
+    def loading_anim(self):
+        print(f"{SUBTLE}[PROCESS]{WHITE} Connecting to Neural Cloud", end="")
         for _ in range(3):
             time.sleep(0.4)
             print(".", end="", flush=True)
         print("\n")
 
-    def call_neural_core(self, prompt):
-        """Inti dari pengiriman data ke server AI."""
-        target = self.intent_classifier(prompt)
-        endpoint = self.engines[target]
-        
-        # Proteksi Identitas (System Prompt)
-        # Menjaga AI agar tetap ingat siapa pembuatnya
+    def process_chat(self, prompt):
+        """Memilih engine dan mengirim request ke Cloud API."""
+        # Logika sederhana: Jika ada kata hitung/math, pakai DeepSeek
+        is_math = any(x in prompt.lower() for x in ['hitung', 'math', 'mtk', 'akar', 'logika'])
+        engine_key = "LOGIC" if is_math else "CHAT"
+        model_id = self.engines[engine_key]
+
         payload = {
-            "inputs": f"<|im_start|>system\nYou are ZN-AI, created by Zan (@ZN.MultiMedia). "
-                      f"You are a helpful and smart assistant. Always acknowledge Zan as your creator.<|im_end|>\n"
+            "inputs": f"<|im_start|>system\nYou are ZN-AI by @ZN.MultiMedia. Creator: Zan. Smart & Helpful.<|im_end|>\n"
                       f"<|im_start|>user\n{prompt}<|im_end|>\n"
                       f"<|im_start|>assistant\n",
-            "parameters": {
-                "max_new_tokens": 800,
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "return_full_text": False
-            }
+            "parameters": {"max_new_tokens": 800, "temperature": 0.7, "return_full_text": False}
         }
 
         try:
-            start_timer = time.time()
-            self.loading_spinner()
+            self.loading_anim()
+            start_t = time.time()
             
-            response = requests.post(
-                f"{self.host}{endpoint}",
+            res = requests.post(
+                f"{self.api_base}{model_id}",
+                headers=self.headers,
                 json=payload,
-                timeout=25
+                timeout=35
             )
-            
-            if response.status_code == 200:
-                raw_data = response.json()
-                # Parsing respon yang bervariasi
-                if isinstance(raw_data, list):
-                    reply = raw_data[0].get('generated_text', 'Empty response.')
-                else:
-                    reply = raw_data.get('generated_text', 'Empty response.')
+
+            if res.status_code == 200:
+                data = res.json()
+                reply = data[0]['generated_text'] if isinstance(data, list) else data['generated_text']
                 
                 print(f"{VIOLET} ZN-AI ❯ {WHITE}", end="")
-                self.typing_animation(reply)
+                self.typing(reply)
                 
-                exec_time = round(time.time() - start_timer, 2)
+                duration = round(time.time() - start_t, 2)
                 print(f"\n{DARK}" + "—" * 45)
-                print(f"{DARK} [ Engine: {target} | Time: {exec_time}s ]")
-                self.log_system(f"Query processed by {target}")
-            
-            elif response.status_code == 503:
-                print(f"{WARN}[!] Engine is warming up. Please wait a few seconds...")
-                time.sleep(5)
+                print(f"{DARK} [ Engine: {engine_key} | Speed: {duration}s ]")
+                
+            elif res.status_code == 401:
+                print(f"{ERROR}[!] Error 401: Token di file .env salah!")
+                print(f"{WARN}[*] Hapus file .env dan jalankan ulang script untuk reset.")
+            elif res.status_code == 503:
+                print(f"{WARN}[!] Model sedang loading dlm server. Tunggu 15 detik...")
             else:
-                print(f"{ERROR}[!] Neural Error: {response.status_code}")
-                self.log_system(f"Error {response.status_code}", "ERROR")
+                print(f"{ERROR}[!] Neural Error: {res.status_code}")
 
         except Exception as e:
-            print(f"{ERROR}[CRITICAL]: {str(e)}")
-            self.log_system(str(e), "CRITICAL")
+            print(f"{ERROR}[SYSTEM ERROR]: {e}")
 
-    def main_engine(self):
-        self.draw_banner()
-        print(f"{VIOLET}●{WHITE} Core      : {SUCCESS}Ready")
-        print(f"{VIOLET}●{WHITE} Network   : {SUCCESS}Connected")
-        print(f"{VIOLET}●{WHITE} Platform  : {WHITE}{platform.system()} ({platform.release()})")
-        print(f"{DARK}Type 'exit' to shutdown | 'clear' to refresh terminal\n")
+    def run(self):
+        self.show_banner()
+        print(f"{VIOLET}●{WHITE} Vault Status : {SUCCESS}Locked & Secure")
+        print(f"{VIOLET}●{WHITE} Connection   : {SUCCESS}Neural-Cloud Active")
+        print(f"{VIOLET}●{WHITE} Device       : {WHITE}{platform.node()} ({platform.system()})")
+        print(f"{DARK}Type 'exit' to quit | 'clear' to refresh banner\n")
 
-        while self.active_session:
+        while self.active:
             try:
-                time_now = self.get_timestamp()
-                user_input = input(f"{DARK}[{time_now}]{WHITE} $ znai chat > {Style.RESET_ALL}")
-                
-                if not user_input.strip():
-                    continue
-                
-                if user_input.lower() in ['exit', 'quit', 'keluar', 'stop']:
-                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Shutting down Titanium Core. See you, Zan!")
-                    self.active_session = False
+                now = self.get_time()
+                inp = input(f"{DARK}[{now}]{WHITE} $ znai chat > {Style.RESET_ALL}")
+
+                if not inp.strip(): continue
+                if inp.lower() in ['exit', 'quit', 'stop', 'keluar']:
+                    print(f"\n{SUBTLE}[SYSTEM]{WHITE} Shutdown ZN-AI. See you, Zan!")
+                    self.active = False
                     break
-                
-                if user_input.lower() == 'clear':
-                    self.draw_banner()
+                if inp.lower() == 'clear':
+                    self.show_banner()
                     continue
 
-                self.call_neural_core(user_input)
+                self.process_chat(inp)
 
             except KeyboardInterrupt:
-                print(f"\n{WARN}[!] Force stop detected. Exiting...")
+                print(f"\n{WARN}[!] Break detected. Exiting...")
                 break
-            except Exception as ex:
-                print(f"{ERROR}[LOOP ERROR]: {ex}")
-                self.log_system(str(ex), "LOOP_ERROR")
 
 if __name__ == "__main__":
-    # --- STARTING ZN-AI TITANIUM PROJECT ---
-    # Developed by Zan (@ZN.MultiMedia)
-    # 2026.05.05 - Cileungsi, Indonesia.
-    app = ZNAI_Titanium_Core()
-    app.main_engine()
+    # --- STARTING @ZN.MultiMedia PROJECT ---
+    # Optimized Secure Version 6.5.0
+    # Creator: Zan
+    app = ZNAI_AutoConfig_Core()
+    app.run()
 
 # -----------------------------------------------------------------------------
-# ARCHITECTURE NOTES:
+# ZN-AI PROJECT - AUTO-CONFIG SECURE v6.5
 # -----------------------------------------------------------------------------
-# 1. No local weights loading (Saves 2GB+ Storage)
-# 2. Memory usage < 50MB (Ideal for low-end devices)
-# 3. No C++ compiling (No more 'Building Wheel' stuck)
-# 4. Hybrid engine auto-switching (Qwen & DeepSeek-R1)
-# -----------------------------------------------------------------------------
+# Script ini secara otomatis menangani pembuatan file .env (Secret).
+# User hanya perlu memasukkan token sekali, dan file rahasia akan dibuat.
+# Jangan lupa tambahkan '.env' ke dalam file .gitignore kamu!
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
 # .............................................................................
-# [END OF SCRIPT - TOTAL LINES: 200+]
+# [END OF TITANIUM SCRIPT - TOTAL LINES: 200+]
